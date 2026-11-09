@@ -191,6 +191,45 @@ RSpec.describe CasaCase, type: :model do
 
       expect(described_class.not_assigned(current_user.casa_org)).to contain_exactly(never_assigned_case, inactive_case, other_inactive_case)
     end
+
+    it "excludes reassigned cases (inactive + active assignments)" do
+      org = create(:casa_org)
+      volunteer_a = create(:volunteer, casa_org: org)
+      volunteer_b = create(:volunteer, casa_org: org)
+
+      reassigned_case = create(:casa_case, casa_org: org)
+      create(:case_assignment, casa_case: reassigned_case, volunteer: volunteer_a, active: false)
+      create(:case_assignment, casa_case: reassigned_case, volunteer: volunteer_b, active: true)
+
+      expect(described_class.not_assigned(org)).not_to include(reassigned_case)
+    end
+
+    it "includes cases with only inactive assignments" do
+      org = create(:casa_org)
+      volunteer = create(:volunteer, casa_org: org)
+
+      case_with_only_inactive = create(:casa_case, casa_org: org)
+      create(:case_assignment, casa_case: case_with_only_inactive, volunteer: volunteer, active: false)
+
+      expect(described_class.not_assigned(org)).to include(case_with_only_inactive)
+    end
+
+    it "includes cases never assigned to any volunteer" do
+      org = create(:casa_org)
+      never_assigned = create(:casa_case, casa_org: org)
+
+      expect(described_class.not_assigned(org)).to include(never_assigned)
+    end
+
+    it "excludes cases with only active assignments" do
+      org = create(:casa_org)
+      volunteer = create(:volunteer, casa_org: org)
+
+      actively_assigned_case = create(:casa_case, casa_org: org)
+      create(:case_assignment, casa_case: actively_assigned_case, volunteer: volunteer, active: true)
+
+      expect(described_class.not_assigned(org)).not_to include(actively_assigned_case)
+    end
   end
 
   describe ".should_transition" do
