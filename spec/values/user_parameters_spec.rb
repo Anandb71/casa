@@ -24,16 +24,21 @@ RSpec.describe UserParameters do
   it "permits the allowed user attributes" do
     aggregate_failures do
       expect(subject["email"]).to eq("user@example.com")
-      expect(subject["casa_org_id"]).to eq(1)
       expect(subject["display_name"]).to eq("User Name")
       expect(subject["phone_number"]).to eq("1234567890")
       expect(subject["date_of_birth"]).to eq("2000-01-01")
-      expect(subject["password"]).to eq("password123")
       expect(subject["active"]).to eq("1")
       expect(subject["receive_reimbursement_email"]).to eq("1")
-      expect(subject["type"]).to eq("Volunteer")
       expect(subject["monthly_learning_hours_report"]).to eq("1")
       expect(subject["address_attributes"].to_h).to eq("id" => 1, "content" => "123 Main St")
+    end
+  end
+
+  it "never takes casa_org_id, type or password from the request" do
+    aggregate_failures do
+      expect(subject["casa_org_id"]).to be_nil
+      expect(subject["type"]).to be_nil
+      expect(subject["password"]).to be_nil
     end
   end
 
@@ -97,10 +102,10 @@ RSpec.describe UserParameters do
 
   describe "#with_only" do
     it "slices params down to only the given keys and returns self" do
-      result = subject.with_only(:email, :type)
+      result = subject.with_only(:email, :display_name)
 
       expect(result).to equal(subject)
-      expect(subject.keys).to contain_exactly("email", "type")
+      expect(subject.keys).to contain_exactly("email", "display_name")
     end
   end
 

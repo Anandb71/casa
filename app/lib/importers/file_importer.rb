@@ -54,7 +54,7 @@ class FileImporter
 
   def email_addresses_to_users(clazz, comma_separated_emails)
     emails = comma_separated_emails.split(",").map!(&:strip)
-    clazz.where(email: [emails]).distinct.order(:email).to_a
+    clazz.where(email: emails, casa_org_id: org_id).distinct.order(:email).to_a
   end
 
   def export_failed_imports

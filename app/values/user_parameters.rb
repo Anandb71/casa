@@ -1,16 +1,16 @@
 class UserParameters < SimpleDelegator
   def initialize(params, key = :user)
     params =
+      # casa_org_id, type and password are never taken from the request: callers set them server-side
+      # with with_organization / with_type / with_password, so a form can't move a user to another org,
+      # change their role, or set their password.
       params.require(key).permit(
         :email,
-        :casa_org_id,
         :display_name,
         :phone_number,
         :date_of_birth,
-        :password,
         :active,
         :receive_reimbursement_email,
-        :type,
         :monthly_learning_hours_report,
         address_attributes: [:id, :content, :line_1, :line_2, :city, :state, :zip]
       )

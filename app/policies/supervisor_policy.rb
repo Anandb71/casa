@@ -1,10 +1,9 @@
 class SupervisorPolicy < UserPolicy
   class Scope < ApplicationPolicy::Scope
+    # Filtering only. Callers preload what their page needs: eager-loading volunteers' case_contacts
+    # here pulled every contact in the org into memory on /supervisors and /volunteers (#7279).
     def resolve
-      scope.includes(
-        :volunteers,
-        volunteers: [:supervisor, :case_assignments, :case_contacts]
-      )
+      scope
     end
   end
 
@@ -37,5 +36,5 @@ class SupervisorPolicy < UserPolicy
   end
 
   alias_method :create?, :new?
-  alias_method :change_to_admin?, :is_admin?
+  alias_method :change_to_admin?, :is_admin_same_org?
 end

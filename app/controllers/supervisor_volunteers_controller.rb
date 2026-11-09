@@ -3,7 +3,7 @@ class SupervisorVolunteersController < ApplicationController
 
   def create
     authorize :supervisor_volunteer
-    volunteer = Volunteer.find(supervisor_volunteer_params[:volunteer_id])
+    volunteer = current_organization.volunteers.find(supervisor_volunteer_params[:volunteer_id])
     supervisor = set_supervisor
     if assign_volunteer_to_supervisor(volunteer, supervisor)
       flash[:notice] = "#{volunteer.display_name} successfully assigned to #{supervisor.display_name}."
@@ -16,7 +16,7 @@ class SupervisorVolunteersController < ApplicationController
 
   def unassign
     authorize :supervisor_volunteer
-    volunteer = Volunteer.find(params[:id])
+    volunteer = current_organization.volunteers.find(params[:id])
     if unassign_volunteers_supervisor(volunteer)
       supervisor = volunteer.supervisor_volunteer.supervisor
       flash[:notice] = "#{volunteer.display_name} was unassigned from #{supervisor.display_name}."
@@ -58,7 +58,7 @@ class SupervisorVolunteersController < ApplicationController
   end
 
   def set_supervisor
-    Supervisor.find(params[:supervisor_id] || supervisor_volunteer_params[:supervisor_id])
+    current_organization.supervisors.find(params[:supervisor_id] || supervisor_volunteer_params[:supervisor_id])
   end
 
   def bulk_change_supervisor(supervisor, volunteers)

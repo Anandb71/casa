@@ -137,4 +137,19 @@ RSpec.describe SupervisorImporter do
     expect(data_using_static).to eq(data_using_instance)
     expect(data_using_static).not_to be_empty
   end
+
+  context "when the e-mails belong to users in another org" do
+    let(:other_org) { create(:casa_org) }
+    let!(:other_org_supervisor) do
+      create(:supervisor, casa_org: other_org, display_name: "Other Org", email: "supervisor1@example.net")
+    end
+    let!(:other_org_volunteer) { create(:volunteer, casa_org: other_org, email: "volunteer1@example.net") }
+
+    it "does not update the other org's supervisor or link the other org's volunteer" do
+      SupervisorImporter.import_supervisors(supervisor_import_data_path, casa_org_id)
+
+      expect(other_org_supervisor.reload.display_name).to eq("Other Org")
+      expect(other_org_volunteer.reload.supervisor).to be_nil
+    end
+  end
 end

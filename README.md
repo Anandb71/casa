@@ -56,7 +56,7 @@ Pull requests which are not for an issue but which improve the codebase are also
 
 ### Communication and Collaboration
 
-We highly recommend that you join us in [slack](https://join.slack.com/t/rubyforgood/shared_invite/zt-34b5p4vk3-NWIw6hKs2ma~wm7mYSe0_A) in the #casa channel so you can get fast help for any questions you may have.
+For Slack and Discord, see the [contributor communication guide](CONTRIBUTING.md#where-to-ask-questions).
 
 Check out [our google calendar](https://bit.ly/casacal) to see when office hours and stakeholder meetings are.
 
@@ -204,17 +204,33 @@ Run these commands before starting the installation process:
 </details>
 
 <details>
-<summary>bin/setup fails with a credentials error</summary>
+<summary>bin/setup says it cannot connect to postgres</summary>
 
-1. Open the `.env` file.
-2. Update `POSTGRES_USER` and `POSTGRES_PASSWORD` to match your PostgreSQL credentials.
-3. Run `bin/setup`
+`bin/setup` checks the database before doing anything slow, and prints the host, port
+and user it tried. Either postgres is not running, or the credentials in `.env` are
+wrong — update `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT` and `DATABASE_HOST` to match your
+PostgreSQL setup and re-run `bin/setup`.
+</details>
+
+<details>
+<summary>I want to throw away my local data and start over</summary>
+
+Run `bin/setup --reset`. By default `bin/setup` preserves the development database;
+`--reset` drops, recreates and reseeds it.
 </details>
 
 ## Running the App / Verifying Installation
 1. `cd casa/`
 1. Run `bin/setup`
 1. Run `bin/dev` and visit http://localhost:3000/ to see the app running.
+
+`bin/setup` is safe to re-run — it preserves your development database. Options:
+
+| Flag | Effect |
+|---|---|
+| `--reset` | Drop, recreate and reseed the development database (destroys local data) |
+| `--skip-assets` | Skip `npm ci` and the JS/CSS builds |
+| `--help` | List the options |
 
 ### QA Environment
 

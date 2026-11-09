@@ -65,7 +65,7 @@ RSpec.describe "ChecklistItems", type: :request do
       it "the edit page should load successfully" do
         sign_in_as_admin
         hearing_type = create(:hearing_type)
-        checklist_item = create(:checklist_item)
+        checklist_item = create(:checklist_item, hearing_type: hearing_type)
         get edit_hearing_type_checklist_item_path(hearing_type, checklist_item)
         expect(response).to be_successful
       end
@@ -75,7 +75,7 @@ RSpec.describe "ChecklistItems", type: :request do
       it "does not allow access to the edit page" do
         sign_in_as_volunteer
         hearing_type = create(:hearing_type)
-        checklist_item = create(:checklist_item)
+        checklist_item = create(:checklist_item, hearing_type: hearing_type)
         get edit_hearing_type_checklist_item_path(hearing_type, checklist_item)
         expect(response).to redirect_to root_path
         expect(response.request.flash[:alert]).to eq "Sorry, you are not authorized to perform this action."
@@ -88,7 +88,7 @@ RSpec.describe "ChecklistItems", type: :request do
       it "lets admin users update checklist items" do
         sign_in_as_admin
         hearing_type = create(:hearing_type)
-        checklist_item = create(:checklist_item)
+        checklist_item = create(:checklist_item, hearing_type: hearing_type)
         patch hearing_type_checklist_item_path(
           {
             hearing_type_id: hearing_type.id,
@@ -112,7 +112,7 @@ RSpec.describe "ChecklistItems", type: :request do
       it "does not allow updates" do
         sign_in_as_volunteer
         hearing_type = create(:hearing_type)
-        checklist_item = create(:checklist_item)
+        checklist_item = create(:checklist_item, hearing_type: hearing_type)
         patch hearing_type_checklist_item_path(
           {
             hearing_type_id: hearing_type.id,
@@ -139,7 +139,7 @@ RSpec.describe "ChecklistItems", type: :request do
       it "allows for the deletion of checklist items" do
         sign_in_as_admin
         hearing_type = create(:hearing_type)
-        checklist_item = create(:checklist_item)
+        checklist_item = create(:checklist_item, hearing_type: hearing_type)
         delete hearing_type_checklist_item_path(hearing_type, checklist_item)
         expect(response).to redirect_to edit_hearing_type_path(hearing_type)
         expect(ChecklistItem.count).to eq 0
@@ -150,7 +150,7 @@ RSpec.describe "ChecklistItems", type: :request do
       it "does not allow for the deletion of checklist items" do
         sign_in_as_volunteer
         hearing_type = create(:hearing_type)
-        checklist_item = create(:checklist_item)
+        checklist_item = create(:checklist_item, hearing_type: hearing_type)
         delete hearing_type_checklist_item_path(hearing_type, checklist_item)
         expect(response).to redirect_to root_path
         expect(response.request.flash[:alert]).to eq "Sorry, you are not authorized to perform this action."

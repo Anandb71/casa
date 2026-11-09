@@ -235,14 +235,23 @@ class CaseContacts::FormController < ApplicationController
     CaseContactParameters.new(params)
   end
 
+  # Drops blanks and any case the user can't reach (another org's case, or for a volunteer a case they
+  # aren't actively assigned to). Cases already on this contact stay, so editing an older contact
+  # doesn't lose its case.
   def remove_nil_draft_ids
-    params[:case_contact][:draft_case_ids] -= [""] if params.dig(:case_contact, :draft_case_ids)
+    submitted = params.dig(:case_contact, :draft_case_ids)
+    return unless submitted
+
+    ids = submitted - [""]
+    reachable = policy_scope(current_organization.casa_cases).where(id: ids).pluck(:id).map(&:to_s)
+    already_on_contact = [*@case_contact&.draft_case_ids, @case_contact&.casa_case_id].compact.map(&:to_s)
+    params[:case_contact][:draft_case_ids] = ids.select { |id| reachable.include?(id.to_s) || already_on_contact.include?(id.to_s) }
   end
 
   # Pre-select the case(s) the user arrived with, so a contact started from a case page is already
   # pointed at it. Moved here with #new.
   def build_draft_case_ids(casa_cases)
-    return params[:draft_case_ids] if params[:draft_case_ids].present?
+    return casa_cases.where(id: params[:draft_case_ids]).pluck(:id) if params[:draft_case_ids].present?
     return casa_cases.where(id: params.dig(:case_contact, :casa_case_id)).pluck(:id) if params.dig(:case_contact, :casa_case_id).present?
     return [casa_cases.first.id] if casa_cases.count == 1
 

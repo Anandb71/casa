@@ -29,7 +29,7 @@ class ImportsController < ApplicationController
     authorize :import
     @failed_csv_service.cleanup
 
-    import = import_from_csv(params[:import_type], params[:sms_opt_in], params[:file], current_user.casa_org_id)
+    import = import_from_csv(params[:import_type], params[:sms_opt_in], uploaded_csv_path, current_user.casa_org_id)
     message = import[:message]
 
     # If there were failed imports
@@ -103,6 +103,13 @@ class ImportsController < ApplicationController
     end
   end
 
+  # Only a real multipart upload is accepted. A plain string `file` param would otherwise be treated as a
+  # path on the server and opened.
+  def uploaded_csv_path
+    file = params[:file]
+    file.path if file.is_a?(ActionDispatch::Http::UploadedFile)
+  end
+
   def validate_file(file, import_type)
     # Validate that file is attached
     if file.blank?
@@ -111,7 +118,7 @@ class ImportsController < ApplicationController
 
     # Validate that file exists
     unless File.file?(file)
-      return {type: :error, message: ERR_FILE_NOT_FOUND + ": #{file}"}
+      return {type: :error, message: ERR_FILE_NOT_FOUND}
     end
 
     # Validate that the file is not empty

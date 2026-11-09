@@ -31,6 +31,16 @@ RSpec.describe "/imports", type: :request do
       expect(response).to be_successful
     end
 
+    it "does not open a server path sent as a plain string instead of an upload" do
+      sign_in casa_admin
+      server_file = Rails.root.join("Gemfile").to_s
+
+      post imports_url, params: {import_type: "volunteer", file: server_file, sms_opt_in: "1"}
+
+      expect(request.session[:import_error]).to eq(ImportsController::ERR_FILE_NOT_ATTACHED)
+      expect(request.session[:import_error]).not_to include("source")
+    end
+
     it "validates volunteers CSV header" do
       sign_in casa_admin
 

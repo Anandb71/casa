@@ -59,6 +59,21 @@ RSpec.describe VolunteerImporter do
     end
   end
 
+  context "when the e-mail belongs to a volunteer in another org" do
+    let!(:other_org_volunteer) do
+      create(:volunteer, casa_org: create(:casa_org), display_name: "Other Org", email: "volunteer1@example.net", phone_number: "")
+    end
+
+    it "does not update that volunteer and reports the row as failed" do
+      alert = volunteer_importer.call
+
+      other_org_volunteer.reload
+      expect(other_org_volunteer.display_name).to eq("Other Org")
+      expect(other_org_volunteer.phone_number).to be_blank
+      expect(alert[:type]).to eq(:error)
+    end
+  end
+
   context "when row doesn't have e-mail address" do
     let(:import_file_path) { file_fixture "volunteers_without_email.csv" }
 

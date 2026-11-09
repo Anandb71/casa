@@ -131,6 +131,20 @@ RSpec.describe "CaseContacts::Forms", type: :request do
     let(:attributes) { valid_attributes }
     let(:params) { {case_contact: attributes} }
 
+    context "when draft_case_ids include a case the volunteer can't reach" do
+      let(:other_org_case) { create(:casa_case, casa_org: create(:casa_org)) }
+      let(:unassigned_case) { create(:casa_case, casa_org: volunteer.casa_org) }
+      let(:draft_case_ids) { [casa_case.id, other_org_case.id, unassigned_case.id] }
+
+      it "keeps only the volunteer's own case and files nothing on the others" do
+        case_contact
+
+        expect { request }.not_to change(CaseContact, :count)
+        expect(case_contact.reload.draft_case_ids).to eq([casa_case.id])
+        expect(CaseContact.where(casa_case_id: [other_org_case.id, unassigned_case.id])).to be_empty
+      end
+    end
+
     it "updates the requested case_contact attributes" do
       case_contact.update!(duration_minutes: 5, contact_made: false, contact_type_ids: [contact_types.second.id])
       submitted_hours = attributes[:duration_hours]

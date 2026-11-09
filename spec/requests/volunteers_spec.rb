@@ -210,6 +210,22 @@ RSpec.describe "/volunteers", type: :request do
   describe "PATCH /update" do
     before { sign_in admin }
 
+    it "ignores casa_org_id, type and password in the params" do
+      other_org = create(:casa_org)
+      old_password_digest = volunteer.encrypted_password
+
+      patch volunteer_path(volunteer), params: {
+        volunteer: {display_name: "New Name", casa_org_id: other_org.id, type: "CasaAdmin", password: "attacker-set-1"}
+      }
+
+      expect(response).to have_http_status(:redirect)
+      reloaded = User.find(volunteer.id)
+      expect(reloaded.display_name).to eq "New Name"
+      expect(reloaded.casa_org_id).to eq organization.id
+      expect(reloaded.type).to eq "Volunteer"
+      expect(reloaded.encrypted_password).to eq old_password_digest
+    end
+
     context "with valid params" do
       it "updates the volunteer" do
         patch volunteer_path(volunteer), params: {

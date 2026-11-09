@@ -20,7 +20,7 @@ class VolunteerImporter < FileImporter
       volunteer_params[:phone_number] = volunteer_params.key?(:phone_number) ? "+#{volunteer_params[:phone_number]}" : ""
       volunteer_params[:receive_sms_notifications] = !volunteer_params[:phone_number].empty?
 
-      volunteer = Volunteer.find_by(email: volunteer_params[:email])
+      volunteer = Volunteer.find_by(email: volunteer_params[:email], casa_org_id: org_id)
 
       if volunteer # Volunteer exists try to update it
         update_volunteer(volunteer, volunteer_params)

@@ -44,7 +44,7 @@ class ChecklistItemsController < ApplicationController
   private
 
   def set_checklist_updated_date(hearing_type)
-    hearing_type.update_attribute(:checklist_updated_date, "Updated #{Time.new.strftime("%m/%d/%Y")}")
+    hearing_type.update_attribute(:checklist_updated_date, "Updated #{Time.zone.now.strftime("%m/%d/%Y")}")
   end
 
   def authorize_checklist_item
@@ -56,7 +56,7 @@ class ChecklistItemsController < ApplicationController
   end
 
   def set_checklist_item
-    @checklist_item ||= ChecklistItem.find(params[:id])
+    @checklist_item ||= @hearing_type.checklist_items.find(params[:id])
   end
 
   def checklist_item_params

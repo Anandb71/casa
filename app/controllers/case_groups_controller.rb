@@ -49,8 +49,11 @@ class CaseGroupsController < ApplicationController
   private
 
   def case_group_params
-    params.merge(casa_org: current_organization)
-    params.require(:case_group).permit(:name, casa_case_ids: [])
+    permitted = params.require(:case_group).permit(:name, casa_case_ids: [])
+    if permitted.key?(:casa_case_ids)
+      permitted[:casa_case_ids] = current_organization.casa_cases.where(id: permitted[:casa_case_ids]).pluck(:id)
+    end
+    permitted
   end
 
   def set_case_group

@@ -135,6 +135,24 @@ RSpec.describe "/supervisors", type: :request do
   end
 
   describe "PATCH /update" do
+    context "while signed in as the supervisor themselves" do
+      before { sign_in supervisor }
+
+      it "ignores casa_org_id and password in the params" do
+        other_org = create(:casa_org)
+        old_password_digest = supervisor.encrypted_password
+
+        patch supervisor_path(supervisor), params: {
+          supervisor: {display_name: "New Name", casa_org_id: other_org.id, password: "attacker-set-1"}
+        }
+
+        supervisor.reload
+        expect(supervisor.display_name).to eq "New Name"
+        expect(supervisor.casa_org_id).to eq org.id
+        expect(supervisor.encrypted_password).to eq old_password_digest
+      end
+    end
+
     context "while signed in as an admin" do
       before do
         sign_in admin
